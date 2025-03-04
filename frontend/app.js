@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /* =============================
-       Funciones del Juego
+       Funciones del Juegoo
        ============================= */
 
     function iniciarJuego() {
