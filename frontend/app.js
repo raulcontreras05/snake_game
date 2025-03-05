@@ -12,7 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     const scoreDisplay = document.getElementById('scoreDisplay');
     const finalScoreDisplay = document.getElementById('finalScore');
-    const activePowerUpDisplay = document.getElementById('activePowerUp'); // Elemento para mostrar el power-up activo
+    const activePowerUpDisplay = document.getElementById('activePowerUp'); // Asegúrate de posicionar este elemento en el HTML donde desees (por ejemplo, arriba del canvas)
+
+    // Nuevo: Leyenda de power-ups como sidebar a la derecha del juego
+    const leyendaSidebar = document.getElementById('leyendaSidebar');
+    leyendaSidebar.style.display = 'none'; // Inicialmente oculta
 
     // Variables del juego
     const gridSize = 20;
@@ -128,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /* =============================
-       Funciones del Juegoo
+       Funciones del Juego
        ============================= */
 
     function iniciarJuego() {
@@ -329,8 +333,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Manejar eventos de teclado
+    // Manejar eventos de teclado (evitar scroll y actualizar dirección)
     document.addEventListener('keydown', (event) => {
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+            event.preventDefault();
+        }
         switch (event.key) {
             case 'ArrowRight': if (direction !== 'LEFT') direction = 'RIGHT'; break;
             case 'ArrowLeft': if (direction !== 'RIGHT') direction = 'LEFT'; break;
@@ -377,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (snake.length > 3) {
                     snake = snake.slice(0, Math.max(3, Math.floor(snake.length / 2)));
                     activePowerUpDisplay.textContent = "Power Up activo: Shrink (efecto inmediato)";
-                    // Para efectos inmediatos, restablecer el mensaje después de 2 segundos
                     setTimeout(() => {
                         activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
                     }, 2000);
@@ -427,5 +433,13 @@ document.addEventListener('DOMContentLoaded', () => {
         authSection.style.display = 'none';
         menuPrincipal.style.display = 'block';
     };
-});
 
+    // Función para mostrar/ocultar la leyenda de power-ups (sidebar a la derecha)
+    window.toggleLeyenda = function() {
+        if (leyendaSidebar.style.display === 'none' || leyendaSidebar.style.display === '') {
+            leyendaSidebar.style.display = 'block';
+        } else {
+            leyendaSidebar.style.display = 'none';
+        }
+    };
+});

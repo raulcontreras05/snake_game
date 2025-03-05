@@ -3,72 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <title>Snake Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Menú Principal -->
-  <div id="menuPrincipal">
-    <h1>Bienvenido a Snake Game</h1>
-    <button onclick="mostrarAuth()">Iniciar Juego</button>
-  </div>
-
-  <!-- Sección de Autenticación (oculta inicialmente) -->
-  <div id="authSection" style="display:none;">
-    <div id="loginForm">
-      <h2>Iniciar Sesión</h2>
-      <input type="text" id="loginUsername" placeholder="Usuario">
-      <input type="password" id="loginPassword" placeholder="Contraseña">
-      <button onclick="iniciarSesion()">Entrar</button>
-      <p>¿No tienes cuenta? <a href="#" onclick="mostrarRegistro()">Regístrate aquí</a></p>
+  <div class="container">
+    <!-- Menú Principal -->
+    <div id="menuPrincipal" class="menu">
+      <h1>Bienvenido a Snake Game</h1>
+      <button class="btn" onclick="mostrarAuth()">Iniciar Juego</button>
     </div>
-    <div id="registerForm" style="display:none;">
-      <h2>Registro</h2>
-      <input type="text" id="regUsername" placeholder="Usuario">
-      <input type="email" id="regEmail" placeholder="Email">
-      <input type="password" id="regPassword" placeholder="Contraseña">
-      <button onclick="registrarUsuario()">Registrarse</button>
-      <p>¿Ya tienes cuenta? <a href="#" onclick="mostrarLogin()">Inicia Sesión</a></p>
+
+    <!-- Sección de Autenticación (oculta inicialmente) -->
+    <div id="authSection" class="auth-section hidden">
+      <div id="loginForm" class="form-container">
+        <h2>Iniciar Sesión</h2>
+        <input type="text" id="loginUsername" placeholder="Usuario">
+        <input type="password" id="loginPassword" placeholder="Contraseña">
+        <button class="btn" onclick="iniciarSesion()">Entrar</button>
+        <p>¿No tienes cuenta? <a href="#" onclick="mostrarRegistro()">Regístrate aquí</a></p>
+      </div>
+      <div id="registerForm" class="form-container hidden">
+        <h2>Registro</h2>
+        <input type="text" id="regUsername" placeholder="Usuario">
+        <input type="email" id="regEmail" placeholder="Email">
+        <input type="password" id="regPassword" placeholder="Contraseña">
+        <button class="btn" onclick="registrarUsuario()">Registrarse</button>
+        <p>¿Ya tienes cuenta? <a href="#" onclick="mostrarLogin()">Inicia Sesión</a></p>
+      </div>
+    </div>
+
+    <!-- Sección del Juego -->
+    <div id="gameSection" class="game-section hidden">
+      <div id="gameControls" class="game-controls">
+        <button class="btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <button class="btn" onclick="reiniciarJuego()">Reiniciar Juego</button>
+        <button class="btn" id="btnLeyenda" onclick="toggleLeyenda()">Leyenda de Power-Ups</button>
+      </div>
+      <!-- Mensaje de Power Up activo (reubicado arriba) -->
+      <div id="activePowerUp" class="active-powerup">
+        Power Up activo: Ninguno
+      </div>
+      <!-- Contenedor del juego: Canvas y Sidebar de Leyenda -->
+      <div class="game-container">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="leyendaSidebar" class="leyenda-sidebar hidden">
+          <h3>Leyenda de Power-Ups</h3>
+          <ul>
+            <li><strong>Speed:</strong> Acelera el juego (reduce el intervalo de actualización).</li>
+            <li><strong>Slow:</strong> Ralentiza el juego (aumenta el intervalo de actualización).</li>
+            <li><strong>Score:</strong> Duplica los puntos obtenidos.</li>
+            <li><strong>Shrink:</strong> Reduce la longitud de la serpiente (deja al menos 3 segmentos).</li>
+          </ul>
+        </div>
+      </div>
+      <p id="scoreDisplay" class="score-display">Puntuación: 0</p>
+      <button class="btn" onclick="obtenerRanking()">Ver Ranking</button>
+      <div id="ranking" class="ranking hidden">
+        <h2>Ranking</h2>
+        <ul id="rankingList"></ul>
+        <button class="btn" onclick="cerrarRanking()">Cerrar Ranking</button>
+      </div>
+    </div>
+
+    <!-- Pantalla de Game Over (oculta inicialmente) -->
+    <div id="gameOverScreen" class="game-over hidden">
+      <h2>Game Over</h2>
+      <p id="finalScore"></p>
+      <button class="btn" onclick="reiniciarJuego()">Jugar de Nuevo</button>
+      <button class="btn" onclick="mostrarMenuPrincipal()">Volver al Menú</button>
     </div>
   </div>
-
-  <!-- Sección del Juego -->
-  <div id="gameSection" style="display:none;">
-    <div id="gameControls">
-      <button onclick="cerrarSesion()">Cerrar Sesión</button>
-      <button onclick="reiniciarJuego()">Reiniciar Juego</button>
-    </div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <p id="scoreDisplay">Puntuación: 0</p>
-    <button onclick="obtenerRanking()">Ver Ranking</button>
-    <div id="ranking" style="display:none;">
-      <h2>Ranking</h2>
-      <ul id="rankingList"></ul>
-      <button onclick="cerrarRanking()">Cerrar Ranking</button>
-    </div>
-  </div>
-
-  <div id="powerUpLegend" style="margin-top: 20px; text-align: left; width: 400px; margin-left: auto; margin-right: auto;">
-    <h3>Leyenda de Power-Ups:</h3>
-    <ul>
-      <li><strong>Speed:</strong> Acelera el juego (reduce el intervalo de actualización).</li>
-      <li><strong>Slow:</strong> Ralentiza el juego (aumenta el intervalo de actualización).</li>
-      <li><strong>Score:</strong> Duplica los puntos obtenidos.</li>
-      <li><strong>Shrink:</strong> Reduce la longitud de la serpiente (deja al menos 3 segmentos).</li>
-    </ul>
-  </div>
-  
-  <div id="activePowerUp" style="margin-top: 10px; font-weight: bold;">
-    Power Up activo: Ninguno
-  </div>
-
-  <!-- Pantalla de Game Over (oculta inicialmente) -->
-  <div id="gameOverScreen" style="display:none;">
-    <h2>Game Over</h2>
-    <p id="finalScore"></p>
-    <button onclick="reiniciarJuego()">Jugar de Nuevo</button>
-    <button onclick="mostrarMenuPrincipal()">Volver al Menú</button>
-  </div>
-
   <script src="app.js"></script>
 </body>
 </html>
