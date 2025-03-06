@@ -1,109 +1,109 @@
 /* General Styles */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #74ebd5, #ACB6E5);
-    margin: 0;
-    padding: 20px;
-    color: #333;
-    text-align: center;
-  }
-  
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  /* Utility Classes */
-  .hidden {
-    display: none;
-  }
-  
-  /* Secciones: Menú, Autenticación, Juego, Game Over */
-  .menu, .auth-section, .game-section, .game-over {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .form-container {
-    margin: 10px 0;
-  }
-  
-  input {
-    width: calc(100% - 20px);
-    max-width: 300px;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  button.btn {
-    padding: 10px 20px;
-    margin: 5px;
-    background-color: #333;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  button.btn:hover {
-    background-color: #555;
-  }
-  
-  /* Juego: Controles, Mensaje y Layout */
-  .game-controls {
-    margin-bottom: 10px;
-  }
-  
-  /* Mensaje de Power Up activo (posición superior) */
-  .active-powerup {
-    margin-bottom: 10px;
-    font-weight: bold;
-  }
-  
-  /* Contenedor para el canvas y el sidebar de la leyenda */
-  .game-container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-  }
-  
-  /* Canvas */
-  canvas {
-    background-color: #fff;
-    border: 2px solid #333;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-  }
-  
-  /* Leyenda de Power-Ups (Sidebar) */
-  .leyenda-sidebar {
-    background-color: #fff;
-    border: 1px solid #333;
-    padding: 10px;
-    margin-left: 20px;
-    width: 250px;
-    border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-  
-  /* Score Display */
-  .score-display {
-    font-size: 1.2em;
-    margin-top: 10px;
-  }
-  
-  /* Ranking */
-  .ranking {
-    background: #fff;
-    border: 1px solid #333;
-    padding: 10px;
-    width: 300px;
-    margin: 10px auto;
-    border-radius: 4px;
-  }
-  
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+  margin: 0;
+  padding: 20px;
+  color: #333;
+  text-align: center;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Utility Classes */
+.hidden {
+  display: none;
+}
+
+/* Secciones: Menú, Autenticación, Juego, Game Over */
+.menu, .auth-section, .game-section, .game-over {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-container {
+  margin: 10px 0;
+}
+
+input {
+  width: calc(100% - 20px);
+  max-width: 300px;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button.btn {
+  padding: 10px 20px;
+  margin: 5px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button.btn:hover {
+  background-color: #555;
+}
+
+/* Juego: Controles, Mensaje y Layout */
+.game-controls {
+  margin-bottom: 10px;
+}
+
+.active-powerup {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.game-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+canvas {
+  background-color: #fff;
+  border: 2px solid #333;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.leyenda-sidebar {
+  background-color: #fff;
+  border: 1px solid #333;
+  padding: 10px;
+  margin-left: 20px;
+  width: 250px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.legend-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+.score-display {
+  font-size: 1.2em;
+  margin-top: 10px;
+}
+
+.ranking {
+  background: #fff;
+  border: 1px solid #333;
+  padding: 10px;
+  width: 300px;
+  margin: 10px auto;
+  border-radius: 4px;
+}

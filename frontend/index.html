@@ -5,6 +5,16 @@
   <title>Snake Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Asegura que los botones de los controles se alineen en una sola fila y centrados */
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -36,42 +46,58 @@
     <!-- Sección del Juego -->
     <div id="gameSection" class="game-section hidden">
       <div id="gameControls" class="game-controls">
+        <!-- El botón "Iniciar Juego" se sitúa a la izquierda de "Cerrar Sesión" -->
+        <button id="startGameButton" class="btn">Iniciar Juego</button>
         <button class="btn" onclick="cerrarSesion()">Cerrar Sesión</button>
-        <button class="btn" onclick="reiniciarJuego()">Reiniciar Juego</button>
-        <button class="btn" id="btnLeyenda" onclick="toggleLeyenda()">Leyenda de Power-Ups</button>
+        <button class="btn" onclick="toggleLeyenda()">Leyenda de Power-Ups</button>
       </div>
-      <!-- Mensaje de Power Up activo (reubicado arriba) -->
+      <!-- Mensaje de Power Up activo -->
       <div id="activePowerUp" class="active-powerup">
         Power Up activo: Ninguno
       </div>
-      <!-- Contenedor del juego: Canvas y Sidebar de Leyenda -->
+      <!-- Contenedor para el canvas y la leyenda (sidebar a la derecha) -->
       <div class="game-container">
         <canvas id="gameCanvas" width="400" height="400"></canvas>
         <div id="leyendaSidebar" class="leyenda-sidebar hidden">
           <h3>Leyenda de Power-Ups</h3>
           <ul>
-            <li><strong>Speed:</strong> Acelera el juego (reduce el intervalo de actualización).</li>
-            <li><strong>Slow:</strong> Ralentiza el juego (aumenta el intervalo de actualización).</li>
-            <li><strong>Score:</strong> Duplica los puntos obtenidos.</li>
-            <li><strong>Shrink:</strong> Reduce la longitud de la serpiente (deja al menos 3 segmentos).</li>
+            <li>
+              <img src="assets/images/lightning.png" alt="Speed" class="legend-icon">
+              <strong>Speed:</strong> Acelera el juego.
+            </li>
+            <li>
+              <img src="assets/images/snail.png" alt="Slow" class="legend-icon">
+              <strong>Slow:</strong> Ralentiza el juego.
+            </li>
+            <li>
+              <img src="assets/images/star.png" alt="Score" class="legend-icon">
+              <strong>Score:</strong> Duplica los puntos.
+            </li>
+            <li>
+              <img src="assets/images/minus.png" alt="Shrink" class="legend-icon">
+              <strong>Shrink:</strong> Reduce la longitud de la serpiente.
+            </li>
           </ul>
         </div>
       </div>
       <p id="scoreDisplay" class="score-display">Puntuación: 0</p>
       <button class="btn" onclick="obtenerRanking()">Ver Ranking</button>
-      <div id="ranking" class="ranking hidden">
-        <h2>Ranking</h2>
-        <ul id="rankingList"></ul>
-        <button class="btn" onclick="cerrarRanking()">Cerrar Ranking</button>
-      </div>
     </div>
 
-    <!-- Pantalla de Game Over (oculta inicialmente) -->
+    <!-- Pantalla de Game Over -->
     <div id="gameOverScreen" class="game-over hidden">
       <h2>Game Over</h2>
       <p id="finalScore"></p>
       <button class="btn" onclick="reiniciarJuego()">Jugar de Nuevo</button>
       <button class="btn" onclick="mostrarMenuPrincipal()">Volver al Menú</button>
+      <button class="btn" onclick="obtenerRanking()">Ver Ranking</button>
+    </div>
+
+    <!-- Contenedor de Ranking (fuera de las secciones principales) -->
+    <div id="ranking" class="ranking hidden">
+      <h2>Ranking</h2>
+      <ul id="rankingList"></ul>
+      <button class="btn" onclick="cerrarRanking()">Cerrar Ranking</button>
     </div>
   </div>
   <script src="app.js"></script>

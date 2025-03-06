@@ -1,0 +1,1 @@
+http://localhost/snake_game/frontend/index.html

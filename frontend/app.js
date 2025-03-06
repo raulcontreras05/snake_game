@@ -1,5 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Elementos del DOM
+    // --- Pre-carga de imágenes ---
+    const fruitIcon = new Image();
+    fruitIcon.src = "assets/images/fruit.png";
+
+    const powerUpIcons = {
+        speed: new Image(),
+        slow: new Image(),
+        score: new Image(),
+        shrink: new Image()
+    };
+    powerUpIcons.speed.src = "assets/images/lightning.png";
+    powerUpIcons.slow.src = "assets/images/snail.png";
+    powerUpIcons.score.src = "assets/images/star.png";
+    powerUpIcons.shrink.src = "assets/images/minus.png";
+
+    function preloadAllImages(callback) {
+        const images = [fruitIcon, powerUpIcons.speed, powerUpIcons.slow, powerUpIcons.score, powerUpIcons.shrink];
+        let loadedCount = 0;
+        images.forEach(img => {
+            img.onload = () => {
+                loadedCount++;
+                if (loadedCount === images.length) {
+                    callback();
+                }
+            };
+            img.onerror = () => {
+                console.error("Error al cargar la imagen:", img.src);
+                loadedCount++;
+                if (loadedCount === images.length) {
+                    callback();
+                }
+            };
+        });
+    }
+
+    // --- Elementos del DOM ---
     const menuPrincipal = document.getElementById('menuPrincipal');
     const authSection = document.getElementById('authSection');
     const loginForm = document.getElementById('loginForm');
@@ -12,32 +47,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     const scoreDisplay = document.getElementById('scoreDisplay');
     const finalScoreDisplay = document.getElementById('finalScore');
-    const activePowerUpDisplay = document.getElementById('activePowerUp'); // Asegúrate de posicionar este elemento en el HTML donde desees (por ejemplo, arriba del canvas)
-
-    // Nuevo: Leyenda de power-ups como sidebar a la derecha del juego
+    const activePowerUpDisplay = document.getElementById('activePowerUp');
     const leyendaSidebar = document.getElementById('leyendaSidebar');
-    leyendaSidebar.style.display = 'none'; // Inicialmente oculta
+    leyendaSidebar.style.display = 'none';
+    const startGameButton = document.getElementById('startGameButton');
 
-    // Variables del juego
+    // --- Variables del Juego ---
     const gridSize = 20;
-    const canvasSize = canvas.width; // Suponemos canvas cuadrado
+    const canvasSize = canvas.width;
     let snake = [];
     let direction = 'RIGHT';
     let food = {};
-    let obstacles = []; // Obstáculos existentes
-    let powerUps = [];  // Power-ups activos en el canvas
+    let obstacles = [];
+    let powerUps = [];
     let score = 0;
     let gameInterval;
-    let gameIntervalTime = 200; // Tiempo de actualización normal (ms)
-    let scoreMultiplier = 1;    // Multiplicador de puntos (normal = 1)
-
-    // Variables para efectos temporales de power-ups
+    let gameIntervalTime = 200;
+    let scoreMultiplier = 1;
     let speedTimeout, slowTimeout, scoreTimeout;
 
     /* =============================
        Funciones de Autenticación
        ============================= */
-
     window.mostrarRegistro = function() {
         loginForm.style.display = 'none';
         registerForm.style.display = 'block';
@@ -57,8 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('regUsername').value;
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
-
-        fetch('http://localhost/snake_game/backend/registro.php', {
+        fetch('../backend/registro.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password })
@@ -76,8 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.iniciarSesion = function() {
         const username = document.getElementById('loginUsername').value;
         const password = document.getElementById('loginPassword').value;
-
-        fetch('http://localhost/snake_game/backend/login.php', {
+        fetch('../backend/login.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
@@ -88,14 +117,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.status === 'success') {
                 authSection.style.display = 'none';
                 gameSection.style.display = 'block';
-                iniciarJuego();
+                // Mostrar el botón "Iniciar Juego" para que el jugador decida cuándo empezar
+                startGameButton.style.display = 'block';
             }
         })
         .catch(error => console.error('Error:', error));
     };
 
     window.cerrarSesion = function() {
-        fetch('http://localhost/snake_game/backend/logout.php')
+        fetch('../backend/logout.php')
         .then(response => response.json())
         .then(data => {
             alert(data.message);
@@ -107,9 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =============================
        Funciones del Ranking
        ============================= */
-
     window.obtenerRanking = function() {
-        fetch('http://localhost/snake_game/backend/ranking.php')
+        fetch('../backend/ranking.php')
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
@@ -119,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.textContent = `${item.username}: ${item.score} puntos (${item.fecha})`;
                     rankingList.appendChild(li);
                 });
-                rankingDiv.style.display = 'block';
+                rankingDiv.classList.remove('hidden');
             } else {
                 alert('Error al obtener el ranking');
             }
@@ -128,13 +157,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.cerrarRanking = function() {
-        rankingDiv.style.display = 'none';
+        rankingDiv.classList.add('hidden');
     };
 
     /* =============================
        Funciones del Juego
        ============================= */
-
     function iniciarJuego() {
         snake = [{ x: canvasSize / 2, y: canvasSize / 2 }];
         direction = 'RIGHT';
@@ -149,13 +177,11 @@ document.addEventListener('DOMContentLoaded', () => {
         restartGameInterval();
     }
 
-    // Reinicia el intervalo del juego usando el tiempo actual (gameIntervalTime)
     function restartGameInterval() {
         if (gameInterval) clearInterval(gameInterval);
         gameInterval = setInterval(gameLoop, gameIntervalTime);
     }
 
-    // Genera posición aleatoria para la comida, sin colisionar con la serpiente, obstáculos o power-ups
     function generarComida() {
         let newFood, valid = false;
         while (!valid) {
@@ -164,14 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize
             };
             valid = true;
-            // Verificar contra la serpiente
             for (let segment of snake) {
                 if (segment.x === newFood.x && segment.y === newFood.y) {
                     valid = false;
                     break;
                 }
             }
-            // Verificar contra obstáculos
             if (valid) {
                 for (let obstaculo of obstacles) {
                     if (obstaculo.x === newFood.x && obstaculo.y === newFood.y) {
@@ -180,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            // Verificar contra power-ups
             if (valid) {
                 for (let pu of powerUps) {
                     if (pu.x === newFood.x && pu.y === newFood.y) {
@@ -192,20 +215,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return newFood;
     }
-    
-    // Genera posición aleatoria para un obstáculo
+
     function generarObstaculo() {
         return {
             x: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
             y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize
         };
     }
-    
-    // Genera un power-up aleatorio con un tipo y duración
+
     function generarPowerUp() {
         const tipos = ['speed', 'slow', 'score', 'shrink'];
         const tipo = tipos[Math.floor(Math.random() * tipos.length)];
-        const duration = 10000; // 10 segundos de efecto
+        const duration = 10000;
         let newPU, valid = false;
         while (!valid) {
             newPU = {
@@ -215,14 +236,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 expireTime: Date.now() + duration
             };
             valid = true;
-            // Verificar contra la serpiente
             for (let segment of snake) {
                 if (segment.x === newPU.x && segment.y === newPU.y) {
                     valid = false;
                     break;
                 }
             }
-            // Verificar contra obstáculos
             if (valid) {
                 for (let obstaculo of obstacles) {
                     if (obstaculo.x === newPU.x && obstaculo.y === newPU.y) {
@@ -231,7 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            // Verificar contra la fruta
             if (valid && food.x === newPU.x && food.y === newPU.y) {
                 valid = false;
             }
@@ -239,7 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return newPU;
     }
 
-    // Lógica principal del juego (Game Loop)
     function gameLoop() {
         const head = { ...snake[0] };
         switch (direction) {
@@ -248,27 +265,22 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'UP': head.y -= gridSize; break;
             case 'DOWN': head.y += gridSize; break;
         }
-
-        // Colisión con bordes
         if (head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize) {
             terminarJuego();
             return;
         }
-        // Colisión con la serpiente
         for (let part of snake) {
             if (head.x === part.x && head.y === part.y) {
                 terminarJuego();
                 return;
             }
         }
-        // Colisión con obstáculos
         for (let obstaculo of obstacles) {
             if (head.x === obstaculo.x && head.y === obstaculo.y) {
                 terminarJuego();
                 return;
             }
         }
-        // Colisión con power-ups: activar efecto y eliminar el power-up
         for (let i = 0; i < powerUps.length; i++) {
             let pu = powerUps[i];
             if (head.x === pu.x && head.y === pu.y) {
@@ -277,63 +289,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             }
         }
-
         snake.unshift(head);
-
-        // Si la serpiente come la comida
         if (head.x === food.x && head.y === food.y) {
             score += 10 * scoreMultiplier;
             scoreDisplay.textContent = "Puntuación: " + score;
             food = generarComida();
-            // Con probabilidad, agregar un obstáculo
             if (Math.random() < 0.3) {
                 obstacles.push(generarObstaculo());
             }
         } else {
             snake.pop();
         }
-
-        // Generar power-ups aleatoriamente (baja probabilidad)
         if (Math.random() < 0.02) {
             powerUps.push(generarPowerUp());
         }
-
-        // Remover power-ups expirados
         powerUps = powerUps.filter(pu => Date.now() < pu.expireTime);
-
         dibujar();
     }
 
-    // Dibujar la fruta, obstáculos, power-ups y la serpiente en el canvas
     function dibujar() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Dibujar la fruta
-        ctx.fillStyle = 'red';
-        ctx.fillRect(food.x, food.y, gridSize, gridSize);
-        // Dibujar obstáculos
+        if (fruitIcon.complete && fruitIcon.naturalWidth !== 0) {
+            ctx.drawImage(fruitIcon, food.x, food.y, gridSize, gridSize);
+        } else {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x, food.y, gridSize, gridSize);
+        }
         ctx.fillStyle = 'gray';
         obstacles.forEach(obstaculo => {
             ctx.fillRect(obstaculo.x, obstaculo.y, gridSize, gridSize);
         });
-        // Dibujar power-ups con color según tipo
         powerUps.forEach(pu => {
-            switch (pu.tipo) {
-                case 'speed': ctx.fillStyle = 'orange'; break;
-                case 'slow': ctx.fillStyle = 'blue'; break;
-                case 'score': ctx.fillStyle = 'purple'; break;
-                case 'shrink': ctx.fillStyle = 'pink'; break;
-                default: ctx.fillStyle = 'white'; break;
+            const icon = powerUpIcons[pu.tipo];
+            if (icon && icon.complete && icon.naturalWidth !== 0) {
+                ctx.drawImage(icon, pu.x, pu.y, gridSize, gridSize);
+            } else {
+                switch (pu.tipo) {
+                    case 'speed': ctx.fillStyle = 'orange'; break;
+                    case 'slow': ctx.fillStyle = 'blue'; break;
+                    case 'score': ctx.fillStyle = 'purple'; break;
+                    case 'shrink': ctx.fillStyle = 'pink'; break;
+                    default: ctx.fillStyle = 'white'; break;
+                }
+                ctx.fillRect(pu.x, pu.y, gridSize, gridSize);
             }
-            ctx.fillRect(pu.x, pu.y, gridSize, gridSize);
         });
-        // Dibujar la serpiente
         ctx.fillStyle = 'green';
         snake.forEach(part => {
             ctx.fillRect(part.x, part.y, gridSize, gridSize);
         });
     }
 
-    // Manejar eventos de teclado (evitar scroll y actualizar dirección)
     document.addEventListener('keydown', (event) => {
         if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
             event.preventDefault();
@@ -346,7 +352,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Activar el efecto de un power-up sin pausar el juego
     function activarPowerUp(pu) {
         switch (pu.tipo) {
             case 'speed':
@@ -392,7 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Terminar el juego
     function terminarJuego() {
         clearInterval(gameInterval);
         enviarPuntuacion(score, 1);
@@ -405,9 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
         finalScoreDisplay.textContent = "Tu puntuación fue: " + score;
     }
 
-    // Enviar la puntuación al backend
     function enviarPuntuacion(finalScore, elemento_id) {
-        fetch('http://localhost/snake_game/backend/guardar_score.php', {
+        fetch('../backend/guardar_score.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ score: finalScore, elemento_id: elemento_id })
@@ -422,8 +425,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.reiniciarJuego = function() {
         clearInterval(gameInterval);
         gameOverScreen.style.display = 'none';
-        iniciarJuego();
         gameSection.style.display = 'block';
+        startGameButton.style.display = 'block';
     };
 
     window.mostrarMenuPrincipal = function() {
@@ -434,7 +437,6 @@ document.addEventListener('DOMContentLoaded', () => {
         menuPrincipal.style.display = 'block';
     };
 
-    // Función para mostrar/ocultar la leyenda de power-ups (sidebar a la derecha)
     window.toggleLeyenda = function() {
         if (leyendaSidebar.style.display === 'none' || leyendaSidebar.style.display === '') {
             leyendaSidebar.style.display = 'block';
@@ -442,4 +444,13 @@ document.addEventListener('DOMContentLoaded', () => {
             leyendaSidebar.style.display = 'none';
         }
     };
+
+    startGameButton.addEventListener('click', () => {
+        iniciarJuego();
+        startGameButton.style.display = 'none';
+    });
+
+    preloadAllImages(() => {
+        console.log("Imágenes precargadas.");
+    });
 });
