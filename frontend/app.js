@@ -242,7 +242,11 @@ const powerUpSpawnRate = 0.05;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // Dibujar comida
-        ctx.drawImage(fruitIcon, food.x, food.y, gridSize, gridSize);
+ctx.beginPath();
+        ctx.arc(food.x + gridSize/2, food.y + gridSize/2, gridSize/2, 0, Math.PI * 2);
+        ctx.fillStyle = '#E74C3C'; // Rojo brillante más atractivo para la fruta
+        ctx.fill();
+        ctx.closePath();
         
         // Dibujar obstáculos
         ctx.fillStyle = 'gray';
@@ -252,8 +256,13 @@ const powerUpSpawnRate = 0.05;
         
         // Dibujar power-ups
         powerUps.forEach(pu => {
-            const img = powerUpIcons[pu.tipo];
-            ctx.drawImage(img, pu.x, pu.y, gridSize, gridSize);
+            ctx.fillStyle = getPowerUpColor(pu.tipo);
+            ctx.beginPath();
+            ctx.moveTo(pu.x + gridSize/2, pu.y); // Top vertex
+            ctx.lineTo(pu.x + gridSize, pu.y + gridSize); // Bottom right vertex
+            ctx.lineTo(pu.x, pu.y + gridSize); // Bottom left vertex
+            ctx.closePath();
+            ctx.fill();
         });
         
         // Dibujar serpiente
@@ -262,54 +271,67 @@ const powerUpSpawnRate = 0.05;
             ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
         });
     }
-
-    function activarPowerUp(pu) {
-        switch(pu.tipo) {
-            case 'speed':
-                clearTimeout(speedTimeout);
-gameIntervalTime = Math.max(30, baseGameInterval - 70);
-                restartGameInterval();
-                activePowerUpDisplay.textContent = "Power Up activo: Speed Boost";
-                speedTimeout = setTimeout(() => {
-                    gameIntervalTime = baseGameInterval;
-                    restartGameInterval();
-                    activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-                }, 10000);
-                break;
-                
-            case 'slow':
-                clearTimeout(slowTimeout);
-gameIntervalTime = baseGameInterval + 80;
-                restartGameInterval();
-                activePowerUpDisplay.textContent = "Power Up activo: Slow Down";
-                slowTimeout = setTimeout(() => {
-                    gameIntervalTime = baseGameInterval;
-                    restartGameInterval();
-                    activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-                }, 10000);
-                break;
-                
-            case 'score':
-                clearTimeout(scoreTimeout);
-                scoreMultiplier = 2;
-                activePowerUpDisplay.textContent = "Power Up activo: Score Multiplier";
-                scoreTimeout = setTimeout(() => {
-                    scoreMultiplier = 1;
-                    activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-                }, 10000);
-                break;
-                
-            case 'shrink':
-                if (snake.length > 3) {
-                    snake = snake.slice(0, Math.max(3, Math.floor(snake.length / 2)));
-                    activePowerUpDisplay.textContent = "Power Up activo: Shrink";
-                    setTimeout(() => {
-                        activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-                    }, 2000);
-                }
-                break;
-        }
+function getPowerUpColor(tipo) {
+    switch(tipo) {
+        case 'speed':
+            return '#FFA500'; // Naranja brillante - energía y velocidad
+        case 'slow':
+            return '#4169E1'; // Azul real - calma y control
+        case 'score':
+            return '#FFD700'; // Dorado - valor y recompensa
+        case 'shrink':
+            return '#9932CC'; // Púrpura - transformación y cambio
+        default:
+            return '#FFFFFF'; // Blanco por defecto
     }
+}
+function activarPowerUp(powerUp) {
+    switch (powerUp.tipo) {
+        case 'speed':
+            clearTimeout(speedTimeout);
+            gameIntervalTime = baseGameInterval - 40;
+            restartGameInterval();
+            activePowerUpDisplay.textContent = "Power Up activo: Speed Boost";
+            speedTimeout = setTimeout(() => {
+                gameIntervalTime = baseGameInterval;
+                restartGameInterval();
+                activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
+            }, 10000);
+            break;
+            
+        case 'slow':
+            clearTimeout(slowTimeout);
+            gameIntervalTime = baseGameInterval + 40;
+            restartGameInterval();
+            activePowerUpDisplay.textContent = "Power Up activo: Slow Down";
+            slowTimeout = setTimeout(() => {
+                gameIntervalTime = baseGameInterval;
+                restartGameInterval();
+                activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
+            }, 10000);
+            break;
+            
+        case 'score':
+            clearTimeout(scoreTimeout);
+            scoreMultiplier = 2;
+            activePowerUpDisplay.textContent = "Power Up activo: Score Multiplier";
+            scoreTimeout = setTimeout(() => {
+                scoreMultiplier = 1;
+                activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
+            }, 10000);
+            break;
+            
+        case 'shrink':
+            if (snake.length > 3) {
+                snake = snake.slice(0, Math.max(3, Math.floor(snake.length / 2)));
+                activePowerUpDisplay.textContent = "Power Up activo: Shrink";
+                setTimeout(() => {
+                    activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
+                }, 2000);
+            }
+            break;
+    }
+}
 
     function terminarJuego() {
         clearInterval(gameInterval);
@@ -369,5 +391,24 @@ gameIntervalTime = baseGameInterval + 80;
     });
 
     // --- Inicialización ---
+    // --- Inicialización ---
     leyendaSidebar.style.display = 'none';
+// Actualizar la leyenda con los colores de power-ups
+const legendItems = leyendaSidebar.querySelectorAll('li');
+legendItems.forEach(item => {
+    const powerUpType = item.querySelector('img').alt.toLowerCase();
+    const color = getPowerUpColor(powerUpType);
+    const iconContainer = document.createElement('div');
+    iconContainer.style.width = '0';
+    iconContainer.style.height = '0';
+    iconContainer.style.borderLeft = '12px solid transparent';
+    iconContainer.style.borderRight = '12px solid transparent';
+    iconContainer.style.borderBottom = `24px solid ${color}`;
+    iconContainer.style.display = 'inline-block';
+    iconContainer.style.marginRight = '8px';
+    iconContainer.style.verticalAlign = 'middle';
+    
+    const existingIcon = item.querySelector('img');
+    existingIcon.parentNode.replaceChild(iconContainer, existingIcon);
+});
 });
