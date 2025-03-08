@@ -105,6 +105,7 @@ canvas {
   width: 250px;
   border-radius: 4px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  text-align: left;
 }
 .legend-icon {
   width: 24px;
