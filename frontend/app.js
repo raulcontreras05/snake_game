@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let scoreMultiplier = 1;
     let speedTimeout, slowTimeout, scoreTimeout;
     const obstacleSpawnRate = 0.5;
-    const powerUpSpawnRate = 0.03;
+const powerUpSpawnRate = 0.05;
 
     // --- Funciones de Autenticación ---
     window.mostrarRegistro = function() {
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switch(pu.tipo) {
             case 'speed':
                 clearTimeout(speedTimeout);
-                gameIntervalTime = Math.max(50, baseGameInterval - 30);
+gameIntervalTime = Math.max(30, baseGameInterval - 70);
                 restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Speed Boost";
                 speedTimeout = setTimeout(() => {
@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             case 'slow':
                 clearTimeout(slowTimeout);
-                gameIntervalTime = baseGameInterval + 40;
+gameIntervalTime = baseGameInterval + 80;
                 restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Slow Down";
                 slowTimeout = setTimeout(() => {
