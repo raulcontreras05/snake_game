@@ -396,19 +396,23 @@ function activarPowerUp(powerUp) {
 // Actualizar la leyenda con los colores de power-ups
 const legendItems = leyendaSidebar.querySelectorAll('li');
 legendItems.forEach(item => {
-    const powerUpType = item.querySelector('img').alt.toLowerCase();
+    const powerUpType = item.querySelector('img')?.alt.toLowerCase();
+    if (powerUpType && ['speed', 'slow', 'score', 'shrink'].includes(powerUpType)) {
     const color = getPowerUpColor(powerUpType);
-    const iconContainer = document.createElement('div');
-    iconContainer.style.width = '0';
-    iconContainer.style.height = '0';
-    iconContainer.style.borderLeft = '12px solid transparent';
-    iconContainer.style.borderRight = '12px solid transparent';
-    iconContainer.style.borderBottom = `24px solid ${color}`;
-    iconContainer.style.display = 'inline-block';
-    iconContainer.style.marginRight = '8px';
-    iconContainer.style.verticalAlign = 'middle';
+        const triangleContainer = document.createElement('div');
+        triangleContainer.style.width = '0';
+        triangleContainer.style.height = '0';
+        triangleContainer.style.borderLeft = '12px solid transparent';
+        triangleContainer.style.borderRight = '12px solid transparent';
+        triangleContainer.style.borderBottom = `24px solid ${color}`;
+        triangleContainer.style.display = 'inline-block';
+        triangleContainer.style.marginRight = '8px';
+        triangleContainer.style.verticalAlign = 'middle';
     
     const existingIcon = item.querySelector('img');
-    existingIcon.parentNode.replaceChild(iconContainer, existingIcon);
+        if (existingIcon) {
+            existingIcon.parentNode.replaceChild(triangleContainer, existingIcon);
+        }
+    }
 });
 });
