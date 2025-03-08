@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* Asegura que los botones de los controles se alineen en una sola fila y centrados */
     .game-controls {
       display: flex;
       justify-content: center;
@@ -24,7 +23,7 @@
       <button class="btn" onclick="mostrarAuth()">Iniciar Juego</button>
     </div>
 
-    <!-- Sección de Autenticación (oculta inicialmente) -->
+    <!-- Sección de Autenticación -->
     <div id="authSection" class="auth-section hidden">
       <div id="loginForm" class="form-container">
         <h2>Iniciar Sesión</h2>
@@ -46,16 +45,17 @@
     <!-- Sección del Juego -->
     <div id="gameSection" class="game-section hidden">
       <div id="gameControls" class="game-controls">
-        <!-- El botón "Iniciar Juego" se sitúa a la izquierda de "Cerrar Sesión" -->
         <button id="startGameButton" class="btn">Iniciar Juego</button>
         <button class="btn" onclick="cerrarSesion()">Cerrar Sesión</button>
         <button class="btn" onclick="toggleLeyenda()">Leyenda de Power-Ups</button>
       </div>
+      
       <!-- Mensaje de Power Up activo -->
       <div id="activePowerUp" class="active-powerup">
         Power Up activo: Ninguno
       </div>
-      <!-- Contenedor para el canvas y la leyenda (sidebar a la derecha) -->
+      
+      <!-- Contenedor del juego -->
       <div class="game-container">
         <canvas id="gameCanvas" width="400" height="400"></canvas>
         <div id="leyendaSidebar" class="leyenda-sidebar hidden">
@@ -93,7 +93,7 @@
       <button class="btn" onclick="obtenerRanking()">Ver Ranking</button>
     </div>
 
-    <!-- Contenedor de Ranking (fuera de las secciones principales) -->
+    <!-- Ranking -->
     <div id="ranking" class="ranking hidden">
       <h2>Ranking</h2>
       <ul id="rankingList"></ul>

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Pre-carga de imágenes ---
+    // --- Precarga de imágenes ---
     const fruitIcon = new Image();
     fruitIcon.src = "assets/images/fruit.png";
 
@@ -13,26 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     powerUpIcons.slow.src = "assets/images/snail.png";
     powerUpIcons.score.src = "assets/images/star.png";
     powerUpIcons.shrink.src = "assets/images/minus.png";
-
-    function preloadAllImages(callback) {
-        const images = [fruitIcon, powerUpIcons.speed, powerUpIcons.slow, powerUpIcons.score, powerUpIcons.shrink];
-        let loadedCount = 0;
-        images.forEach(img => {
-            img.onload = () => {
-                loadedCount++;
-                if (loadedCount === images.length) {
-                    callback();
-                }
-            };
-            img.onerror = () => {
-                console.error("Error al cargar la imagen:", img.src);
-                loadedCount++;
-                if (loadedCount === images.length) {
-                    callback();
-                }
-            };
-        });
-    }
 
     // --- Elementos del DOM ---
     const menuPrincipal = document.getElementById('menuPrincipal');
@@ -49,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalScoreDisplay = document.getElementById('finalScore');
     const activePowerUpDisplay = document.getElementById('activePowerUp');
     const leyendaSidebar = document.getElementById('leyendaSidebar');
-    leyendaSidebar.style.display = 'none';
     const startGameButton = document.getElementById('startGameButton');
 
     // --- Variables del Juego ---
@@ -62,13 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let powerUps = [];
     let score = 0;
     let gameInterval;
-    let gameIntervalTime = 200;
+    const baseGameInterval = 150;
+    let gameIntervalTime = baseGameInterval;
     let scoreMultiplier = 1;
     let speedTimeout, slowTimeout, scoreTimeout;
+    const obstacleSpawnRate = 0.5;
+    const powerUpSpawnRate = 0.03;
 
-    /* =============================
-       Funciones de Autenticación
-       ============================= */
+    // --- Funciones de Autenticación ---
     window.mostrarRegistro = function() {
         loginForm.style.display = 'none';
         registerForm.style.display = 'block';
@@ -88,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('regUsername').value;
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
+        
         fetch('../backend/registro.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -96,9 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             alert(data.message);
-            if (data.status === 'success') {
-                mostrarLogin();
-            }
+            if (data.status === 'success') mostrarLogin();
         })
         .catch(error => console.error('Error:', error));
     };
@@ -106,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.iniciarSesion = function() {
         const username = document.getElementById('loginUsername').value;
         const password = document.getElementById('loginPassword').value;
+        
         fetch('../backend/login.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -117,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.status === 'success') {
                 authSection.style.display = 'none';
                 gameSection.style.display = 'block';
-                // Mostrar el botón "Iniciar Juego" para que el jugador decida cuándo empezar
                 startGameButton.style.display = 'block';
             }
         })
@@ -134,9 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error:', error));
     };
 
-    /* =============================
-       Funciones del Ranking
-       ============================= */
+    // --- Funciones del Ranking ---
     window.obtenerRanking = function() {
         fetch('../backend/ranking.php')
         .then(response => response.json())
@@ -149,8 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     rankingList.appendChild(li);
                 });
                 rankingDiv.classList.remove('hidden');
-            } else {
-                alert('Error al obtener el ranking');
             }
         })
         .catch(error => console.error('Error:', error));
@@ -160,9 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rankingDiv.classList.add('hidden');
     };
 
-    /* =============================
-       Funciones del Juego
-       ============================= */
+    // --- Funciones principales del juego ---
     function iniciarJuego() {
         snake = [{ x: canvasSize / 2, y: canvasSize / 2 }];
         direction = 'RIGHT';
@@ -171,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         powerUps = [];
         score = 0;
         scoreMultiplier = 1;
-        gameIntervalTime = 200;
         scoreDisplay.textContent = "Puntuación: " + score;
         activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
         restartGameInterval();
@@ -183,78 +155,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generarComida() {
-        let newFood, valid = false;
-        while (!valid) {
+        let newFood;
+        do {
             newFood = {
                 x: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
                 y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize
             };
-            valid = true;
-            for (let segment of snake) {
-                if (segment.x === newFood.x && segment.y === newFood.y) {
-                    valid = false;
-                    break;
-                }
-            }
-            if (valid) {
-                for (let obstaculo of obstacles) {
-                    if (obstaculo.x === newFood.x && obstaculo.y === newFood.y) {
-                        valid = false;
-                        break;
-                    }
-                }
-            }
-            if (valid) {
-                for (let pu of powerUps) {
-                    if (pu.x === newFood.x && pu.y === newFood.y) {
-                        valid = false;
-                        break;
-                    }
-                }
-            }
-        }
+        } while (checkColision(newFood));
         return newFood;
     }
 
+    function checkColision(pos) {
+        return snake.some(segment => segment.x === pos.x && segment.y === pos.y) ||
+               obstacles.some(obstaculo => obstaculo.x === pos.x && obstaculo.y === pos.y) ||
+               (food.x === pos.x && food.y === pos.y);
+    }
+
     function generarObstaculo() {
-        return {
-            x: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
-            y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize
-        };
+        let newObstacle;
+        do {
+            newObstacle = {
+                x: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
+                y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize
+            };
+        } while (checkColision(newObstacle));
+        return newObstacle;
     }
 
     function generarPowerUp() {
         const tipos = ['speed', 'slow', 'score', 'shrink'];
-        const tipo = tipos[Math.floor(Math.random() * tipos.length)];
-        const duration = 10000;
-        let newPU, valid = false;
-        while (!valid) {
-            newPU = {
-                x: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
-                y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
-                tipo: tipo,
-                expireTime: Date.now() + duration
-            };
-            valid = true;
-            for (let segment of snake) {
-                if (segment.x === newPU.x && segment.y === newPU.y) {
-                    valid = false;
-                    break;
-                }
-            }
-            if (valid) {
-                for (let obstaculo of obstacles) {
-                    if (obstaculo.x === newPU.x && obstaculo.y === newPU.y) {
-                        valid = false;
-                        break;
-                    }
-                }
-            }
-            if (valid && food.x === newPU.x && food.y === newPU.y) {
-                valid = false;
-            }
-        }
-        return newPU;
+        return {
+            x: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
+            y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
+            tipo: tipos[Math.floor(Math.random() * tipos.length)],
+            expireTime: Date.now() + 10000
+        };
     }
 
     function gameLoop() {
@@ -265,117 +200,95 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'UP': head.y -= gridSize; break;
             case 'DOWN': head.y += gridSize; break;
         }
+
         if (head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize) {
             terminarJuego();
             return;
         }
-        for (let part of snake) {
-            if (head.x === part.x && head.y === part.y) {
-                terminarJuego();
-                return;
-            }
+
+        if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+            terminarJuego();
+            return;
         }
-        for (let obstaculo of obstacles) {
-            if (head.x === obstaculo.x && head.y === obstaculo.y) {
-                terminarJuego();
-                return;
-            }
+
+        if (obstacles.some(obstaculo => obstaculo.x === head.x && obstaculo.y === head.y)) {
+            terminarJuego();
+            return;
         }
-        for (let i = 0; i < powerUps.length; i++) {
-            let pu = powerUps[i];
-            if (head.x === pu.x && head.y === pu.y) {
-                activarPowerUp(pu);
-                powerUps.splice(i, 1);
-                break;
-            }
+
+        const powerUpIndex = powerUps.findIndex(pu => pu.x === head.x && pu.y === head.y);
+        if (powerUpIndex !== -1) {
+            activarPowerUp(powerUps[powerUpIndex]);
+            powerUps.splice(powerUpIndex, 1);
         }
+
         snake.unshift(head);
+
         if (head.x === food.x && head.y === food.y) {
             score += 10 * scoreMultiplier;
             scoreDisplay.textContent = "Puntuación: " + score;
             food = generarComida();
-            if (Math.random() < 0.3) {
-                obstacles.push(generarObstaculo());
-            }
+            if (Math.random() < obstacleSpawnRate) obstacles.push(generarObstaculo());
         } else {
             snake.pop();
         }
-        if (Math.random() < 0.02) {
-            powerUps.push(generarPowerUp());
-        }
+
+        if (Math.random() < powerUpSpawnRate) powerUps.push(generarPowerUp());
         powerUps = powerUps.filter(pu => Date.now() < pu.expireTime);
         dibujar();
     }
 
     function dibujar() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (fruitIcon.complete && fruitIcon.naturalWidth !== 0) {
-            ctx.drawImage(fruitIcon, food.x, food.y, gridSize, gridSize);
-        } else {
-            ctx.fillStyle = 'red';
-            ctx.fillRect(food.x, food.y, gridSize, gridSize);
-        }
+        
+        // Dibujar comida
+        ctx.drawImage(fruitIcon, food.x, food.y, gridSize, gridSize);
+        
+        // Dibujar obstáculos
         ctx.fillStyle = 'gray';
         obstacles.forEach(obstaculo => {
             ctx.fillRect(obstaculo.x, obstaculo.y, gridSize, gridSize);
         });
+        
+        // Dibujar power-ups
         powerUps.forEach(pu => {
-            const icon = powerUpIcons[pu.tipo];
-            if (icon && icon.complete && icon.naturalWidth !== 0) {
-                ctx.drawImage(icon, pu.x, pu.y, gridSize, gridSize);
-            } else {
-                switch (pu.tipo) {
-                    case 'speed': ctx.fillStyle = 'orange'; break;
-                    case 'slow': ctx.fillStyle = 'blue'; break;
-                    case 'score': ctx.fillStyle = 'purple'; break;
-                    case 'shrink': ctx.fillStyle = 'pink'; break;
-                    default: ctx.fillStyle = 'white'; break;
-                }
-                ctx.fillRect(pu.x, pu.y, gridSize, gridSize);
-            }
+            const img = powerUpIcons[pu.tipo];
+            ctx.drawImage(img, pu.x, pu.y, gridSize, gridSize);
         });
+        
+        // Dibujar serpiente
         ctx.fillStyle = 'green';
-        snake.forEach(part => {
-            ctx.fillRect(part.x, part.y, gridSize, gridSize);
+        snake.forEach(segment => {
+            ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
         });
     }
 
-    document.addEventListener('keydown', (event) => {
-        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
-            event.preventDefault();
-        }
-        switch (event.key) {
-            case 'ArrowRight': if (direction !== 'LEFT') direction = 'RIGHT'; break;
-            case 'ArrowLeft': if (direction !== 'RIGHT') direction = 'LEFT'; break;
-            case 'ArrowUp': if (direction !== 'DOWN') direction = 'UP'; break;
-            case 'ArrowDown': if (direction !== 'UP') direction = 'DOWN'; break;
-        }
-    });
-
     function activarPowerUp(pu) {
-        switch (pu.tipo) {
+        switch(pu.tipo) {
             case 'speed':
                 clearTimeout(speedTimeout);
-                gameIntervalTime = 100;
+                gameIntervalTime = Math.max(50, baseGameInterval - 30);
                 restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Speed Boost";
                 speedTimeout = setTimeout(() => {
-                    gameIntervalTime = 200;
+                    gameIntervalTime = baseGameInterval;
                     restartGameInterval();
                     activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
                 }, 10000);
                 break;
+                
             case 'slow':
                 clearTimeout(slowTimeout);
-                gameIntervalTime = 300;
+                gameIntervalTime = baseGameInterval + 40;
                 restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Slow Down";
                 slowTimeout = setTimeout(() => {
-                    gameIntervalTime = 200;
+                    gameIntervalTime = baseGameInterval;
                     restartGameInterval();
                     activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
                 }, 10000);
                 break;
+                
             case 'score':
                 clearTimeout(scoreTimeout);
                 scoreMultiplier = 2;
@@ -385,10 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
                 }, 10000);
                 break;
+                
             case 'shrink':
                 if (snake.length > 3) {
                     snake = snake.slice(0, Math.max(3, Math.floor(snake.length / 2)));
-                    activePowerUpDisplay.textContent = "Power Up activo: Shrink (efecto inmediato)";
+                    activePowerUpDisplay.textContent = "Power Up activo: Shrink";
                     setTimeout(() => {
                         activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
                     }, 2000);
@@ -399,38 +313,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function terminarJuego() {
         clearInterval(gameInterval);
-        enviarPuntuacion(score, 1);
+        enviarPuntuacion(score);
         mostrarGameOver();
+    }
+
+    function enviarPuntuacion(finalScore) {
+        fetch('../backend/guardar_score.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ score: finalScore })
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     function mostrarGameOver() {
         gameSection.style.display = 'none';
         gameOverScreen.style.display = 'block';
-        finalScoreDisplay.textContent = "Tu puntuación fue: " + score;
+        finalScoreDisplay.textContent = "Puntuación final: " + score;
     }
 
-    function enviarPuntuacion(finalScore, elemento_id) {
-        fetch('../backend/guardar_score.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ score: finalScore, elemento_id: elemento_id })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Respuesta al enviar puntuación:', data);
-        })
-        .catch(error => console.error('Error al enviar puntuación:', error));
-    }
-
+    // --- Funciones de control ---
     window.reiniciarJuego = function() {
-        clearInterval(gameInterval);
         gameOverScreen.style.display = 'none';
         gameSection.style.display = 'block';
-        startGameButton.style.display = 'block';
+        iniciarJuego();
     };
 
     window.mostrarMenuPrincipal = function() {
-        clearInterval(gameInterval);
         gameOverScreen.style.display = 'none';
         gameSection.style.display = 'none';
         authSection.style.display = 'none';
@@ -438,19 +347,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.toggleLeyenda = function() {
-        if (leyendaSidebar.style.display === 'none' || leyendaSidebar.style.display === '') {
-            leyendaSidebar.style.display = 'block';
-        } else {
-            leyendaSidebar.style.display = 'none';
-        }
+        leyendaSidebar.style.display = leyendaSidebar.style.display === 'none' ? 'block' : 'none';
     };
+
+    // --- Event Listeners ---
+    document.addEventListener('keydown', (event) => {
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+            event.preventDefault();
+            switch(event.key) {
+                case 'ArrowRight': if (direction !== 'LEFT') direction = 'RIGHT'; break;
+                case 'ArrowLeft': if (direction !== 'RIGHT') direction = 'LEFT'; break;
+                case 'ArrowUp': if (direction !== 'DOWN') direction = 'UP'; break;
+                case 'ArrowDown': if (direction !== 'UP') direction = 'DOWN'; break;
+            }
+        }
+    });
 
     startGameButton.addEventListener('click', () => {
         iniciarJuego();
         startGameButton.style.display = 'none';
     });
 
-    preloadAllImages(() => {
-        console.log("Imágenes precargadas.");
-    });
+    // --- Inicialización ---
+    leyendaSidebar.style.display = 'none';
 });

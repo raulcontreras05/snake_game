@@ -1,4 +1,3 @@
-/* General Styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #74ebd5, #ACB6E5);
@@ -13,12 +12,10 @@ body {
   margin: 0 auto;
 }
 
-/* Utility Classes */
 .hidden {
   display: none;
 }
 
-/* Secciones: Menú, Autenticación, Juego, Game Over */
 .menu, .auth-section, .game-section, .game-over {
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
@@ -55,7 +52,6 @@ button.btn:hover {
   background-color: #555;
 }
 
-/* Juego: Controles, Mensaje y Layout */
 .game-controls {
   margin-bottom: 10px;
 }
