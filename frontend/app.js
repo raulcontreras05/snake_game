@@ -345,6 +345,12 @@ function activarPowerUp(powerUp) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ score: finalScore })
         })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "error") {
+                console.error('Error al guardar puntuación:', data.message);
+            }
+        })
         .catch(error => console.error('Error:', error));
     }
 

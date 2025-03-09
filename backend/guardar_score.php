@@ -12,7 +12,7 @@ session_start();
 require 'config.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
-if (isset($data['score'], $data['elemento_id'])) {
+if (isset($data['score'])) {
     if (!isset($_SESSION['user_id'])) {
         echo json_encode([
             "status" => "error",
@@ -20,13 +20,12 @@ if (isset($data['score'], $data['elemento_id'])) {
         ]);
         exit;
     }
+    
     $usuario_id = $_SESSION['user_id'];
     $score = $data['score'];
-    $elemento_id = $data['elemento_id'];
-
     try {
-        $stmt = $pdo->prepare("INSERT INTO puntuaciones (usuario_id, elemento_id, score) VALUES (?, ?, ?)");
-        $stmt->execute([$usuario_id, $elemento_id, $score]);
+        $stmt = $pdo->prepare("INSERT INTO puntuaciones (usuario_id, score) VALUES (?, ?)");
+        $stmt->execute([$usuario_id, $score]);
         echo json_encode([
             "status" => "success",
             "message" => "Puntuación guardada exitosamente"
