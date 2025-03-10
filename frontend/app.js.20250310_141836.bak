@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let speedTimeout, slowTimeout, scoreTimeout;
     const obstacleSpawnRate = 0.7; // Aumentado para mayor dificultad
     const powerUpSpawnRate = 0.03; // Reducido para que los power-ups sean más escasos
-    let isPaused = false; // Variable para controlar el estado de pausa
 
 
     // --- Funciones de Autenticación ---
@@ -148,19 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreMultiplier = 1;
         scoreDisplay.textContent = "Puntuación: " + score;
         activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-        isPaused = false;
-        startGameButton.textContent = "Pausar";
-        startGameButton.style.display = 'block';
         restartGameInterval();
     }
 
     function restartGameInterval() {
-        // Si ya hay un intervalo activo, lo limpiamos solo si no estamos reanudando de una pausa
-        if (gameInterval && !isPaused) clearInterval(gameInterval);
-        // Si no hay intervalo o estamos reanudando, creamos uno nuevo
-        if (!gameInterval) {
-            gameInterval = setInterval(gameLoop, gameIntervalTime);
-        }
+        if (gameInterval) clearInterval(gameInterval);
+        gameInterval = setInterval(gameLoop, gameIntervalTime);
     }
 
     function generarComida() {
@@ -202,13 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function gameLoop() {
-        // Si el juego está pausado, no procesamos la lógica del juego
-        if (isPaused) {
-            // Solo dibujamos el mensaje de pausa sin modificar el estado del juego
-            drawPauseMessage();
-            return;
-        }
-        
         const head = { ...snake[0] };
         switch (direction) {
             case 'RIGHT': head.x += gridSize; break;
@@ -263,13 +248,6 @@ ctx.beginPath();
         ctx.fillStyle = '#E74C3C'; // Rojo brillante más atractivo para la fruta
         ctx.fill();
         ctx.closePath();
-        
-        // Si el juego está pausado, mostrar mensaje de pausa
-        if (isPaused) {
-            drawPauseMessage();
-        }
-
-
         
         // Dibujar obstáculos
         ctx.fillStyle = 'gray';
@@ -358,8 +336,6 @@ function activarPowerUp(powerUp) {
 
     function terminarJuego() {
         clearInterval(gameInterval);
-        isPaused = false;
-        startGameButton.textContent = "Iniciar Juego";
         enviarPuntuacion(score);
         mostrarGameOver();
     }
@@ -417,62 +393,33 @@ function activarPowerUp(powerUp) {
     });
 
     startGameButton.addEventListener('click', () => {
-        if (gameInterval || isPaused) {
-            // Si ya hay un juego en curso, alternar entre pausar y reanudar
-            if (!isPaused) {
-                // Pausar el juego
-                clearInterval(gameInterval);
-                // Guardamos el intervalo pero no lo establecemos a null para mantener el estado
-                isPaused = true;
-                startGameButton.textContent = "Reanudar";
-                drawPauseMessage();
-            } else {
-                // Reanudar el juego
-                isPaused = false;
-                startGameButton.textContent = "Pausar";
-                // Crear un nuevo intervalo para continuar el juego
-                gameInterval = setInterval(gameLoop, gameIntervalTime);
-            }
-        } else {
-            // Iniciar un nuevo juego
-            iniciarJuego();
-        }
+        iniciarJuego();
+        startGameButton.style.display = 'none';
     });
 
     // --- Inicialización ---
-    // Función para dibujar mensaje de pausa
-    function drawPauseMessage() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.font = 'bold 48px Arial';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('PAUSA', canvas.width / 2, canvas.height / 2);
-    }
-    
     // --- Inicialización ---
     leyendaSidebar.style.display = 'none';
-    const legendItems = leyendaSidebar.querySelectorAll('li');
-    legendItems.forEach(item => {
-        const powerUpType = item.querySelector('img')?.alt.toLowerCase();
-        if (powerUpType && ['speed', 'slow', 'score', 'shrink'].includes(powerUpType)) {
-            const color = getPowerUpColor(powerUpType);
-            const triangleContainer = document.createElement('div');
-            triangleContainer.style.width = '0';
-            triangleContainer.style.height = '0';
-            triangleContainer.style.borderLeft = '12px solid transparent';
-            triangleContainer.style.borderRight = '12px solid transparent';
-            triangleContainer.style.borderBottom = `24px solid ${color}`;
-            triangleContainer.style.display = 'inline-block';
-            triangleContainer.style.marginRight = '8px';
-            triangleContainer.style.verticalAlign = 'middle';
-        
-            const existingIcon = item.querySelector('img');
-            if (existingIcon) {
-                existingIcon.parentNode.replaceChild(triangleContainer, existingIcon);
-            }
+// Actualizar la leyenda con los colores de power-ups
+const legendItems = leyendaSidebar.querySelectorAll('li');
+legendItems.forEach(item => {
+    const powerUpType = item.querySelector('img')?.alt.toLowerCase();
+    if (powerUpType && ['speed', 'slow', 'score', 'shrink'].includes(powerUpType)) {
+    const color = getPowerUpColor(powerUpType);
+        const triangleContainer = document.createElement('div');
+        triangleContainer.style.width = '0';
+        triangleContainer.style.height = '0';
+        triangleContainer.style.borderLeft = '12px solid transparent';
+        triangleContainer.style.borderRight = '12px solid transparent';
+        triangleContainer.style.borderBottom = `24px solid ${color}`;
+        triangleContainer.style.display = 'inline-block';
+        triangleContainer.style.marginRight = '8px';
+        triangleContainer.style.verticalAlign = 'middle';
+    
+    const existingIcon = item.querySelector('img');
+        if (existingIcon) {
+            existingIcon.parentNode.replaceChild(triangleContainer, existingIcon);
         }
-    });
+    }
+});
 });

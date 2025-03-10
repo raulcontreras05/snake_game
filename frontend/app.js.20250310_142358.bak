@@ -155,12 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function restartGameInterval() {
-        // Si ya hay un intervalo activo, lo limpiamos solo si no estamos reanudando de una pausa
-        if (gameInterval && !isPaused) clearInterval(gameInterval);
-        // Si no hay intervalo o estamos reanudando, creamos uno nuevo
-        if (!gameInterval) {
-            gameInterval = setInterval(gameLoop, gameIntervalTime);
-        }
+        if (gameInterval) clearInterval(gameInterval);
+        gameInterval = setInterval(gameLoop, gameIntervalTime);
     }
 
     function generarComida() {
@@ -204,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function gameLoop() {
         // Si el juego está pausado, no procesamos la lógica del juego
         if (isPaused) {
-            // Solo dibujamos el mensaje de pausa sin modificar el estado del juego
             drawPauseMessage();
             return;
         }
@@ -417,12 +412,12 @@ function activarPowerUp(powerUp) {
     });
 
     startGameButton.addEventListener('click', () => {
-        if (gameInterval || isPaused) {
+        if (gameInterval) {
             // Si ya hay un juego en curso, alternar entre pausar y reanudar
             if (!isPaused) {
                 // Pausar el juego
                 clearInterval(gameInterval);
-                // Guardamos el intervalo pero no lo establecemos a null para mantener el estado
+                gameInterval = null;
                 isPaused = true;
                 startGameButton.textContent = "Reanudar";
                 drawPauseMessage();
@@ -430,8 +425,7 @@ function activarPowerUp(powerUp) {
                 // Reanudar el juego
                 isPaused = false;
                 startGameButton.textContent = "Pausar";
-                // Crear un nuevo intervalo para continuar el juego
-                gameInterval = setInterval(gameLoop, gameIntervalTime);
+                restartGameInterval();
             }
         } else {
             // Iniciar un nuevo juego
@@ -453,26 +447,27 @@ function activarPowerUp(powerUp) {
     }
     
     // --- Inicialización ---
+    // --- Inicialización ---
     leyendaSidebar.style.display = 'none';
-    const legendItems = leyendaSidebar.querySelectorAll('li');
-    legendItems.forEach(item => {
-        const powerUpType = item.querySelector('img')?.alt.toLowerCase();
-        if (powerUpType && ['speed', 'slow', 'score', 'shrink'].includes(powerUpType)) {
-            const color = getPowerUpColor(powerUpType);
-            const triangleContainer = document.createElement('div');
-            triangleContainer.style.width = '0';
-            triangleContainer.style.height = '0';
-            triangleContainer.style.borderLeft = '12px solid transparent';
-            triangleContainer.style.borderRight = '12px solid transparent';
-            triangleContainer.style.borderBottom = `24px solid ${color}`;
-            triangleContainer.style.display = 'inline-block';
-            triangleContainer.style.marginRight = '8px';
-            triangleContainer.style.verticalAlign = 'middle';
-        
-            const existingIcon = item.querySelector('img');
-            if (existingIcon) {
-                existingIcon.parentNode.replaceChild(triangleContainer, existingIcon);
-            }
+const legendItems = leyendaSidebar.querySelectorAll('li');
+legendItems.forEach(item => {
+    const powerUpType = item.querySelector('img')?.alt.toLowerCase();
+    if (powerUpType && ['speed', 'slow', 'score', 'shrink'].includes(powerUpType)) {
+    const color = getPowerUpColor(powerUpType);
+        const triangleContainer = document.createElement('div');
+        triangleContainer.style.width = '0';
+        triangleContainer.style.height = '0';
+        triangleContainer.style.borderLeft = '12px solid transparent';
+        triangleContainer.style.borderRight = '12px solid transparent';
+        triangleContainer.style.borderBottom = `24px solid ${color}`;
+        triangleContainer.style.display = 'inline-block';
+        triangleContainer.style.marginRight = '8px';
+        triangleContainer.style.verticalAlign = 'middle';
+    
+    const existingIcon = item.querySelector('img');
+        if (existingIcon) {
+            existingIcon.parentNode.replaceChild(triangleContainer, existingIcon);
         }
-    });
+    }
+});
 });

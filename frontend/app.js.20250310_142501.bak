@@ -437,7 +437,7 @@ function activarPowerUp(powerUp) {
             // Iniciar un nuevo juego
             iniciarJuego();
         }
-    });
+
 
     // --- Inicialización ---
     // Función para dibujar mensaje de pausa
@@ -453,26 +453,27 @@ function activarPowerUp(powerUp) {
     }
     
     // --- Inicialización ---
+    // --- Inicialización ---
     leyendaSidebar.style.display = 'none';
-    const legendItems = leyendaSidebar.querySelectorAll('li');
-    legendItems.forEach(item => {
-        const powerUpType = item.querySelector('img')?.alt.toLowerCase();
-        if (powerUpType && ['speed', 'slow', 'score', 'shrink'].includes(powerUpType)) {
-            const color = getPowerUpColor(powerUpType);
-            const triangleContainer = document.createElement('div');
-            triangleContainer.style.width = '0';
-            triangleContainer.style.height = '0';
-            triangleContainer.style.borderLeft = '12px solid transparent';
-            triangleContainer.style.borderRight = '12px solid transparent';
-            triangleContainer.style.borderBottom = `24px solid ${color}`;
-            triangleContainer.style.display = 'inline-block';
-            triangleContainer.style.marginRight = '8px';
-            triangleContainer.style.verticalAlign = 'middle';
-        
-            const existingIcon = item.querySelector('img');
-            if (existingIcon) {
-                existingIcon.parentNode.replaceChild(triangleContainer, existingIcon);
-            }
+const legendItems = leyendaSidebar.querySelectorAll('li');
+legendItems.forEach(item => {
+    const powerUpType = item.querySelector('img')?.alt.toLowerCase();
+    if (powerUpType && ['speed', 'slow', 'score', 'shrink'].includes(powerUpType)) {
+    const color = getPowerUpColor(powerUpType);
+        const triangleContainer = document.createElement('div');
+        triangleContainer.style.width = '0';
+        triangleContainer.style.height = '0';
+        triangleContainer.style.borderLeft = '12px solid transparent';
+        triangleContainer.style.borderRight = '12px solid transparent';
+        triangleContainer.style.borderBottom = `24px solid ${color}`;
+        triangleContainer.style.display = 'inline-block';
+        triangleContainer.style.marginRight = '8px';
+        triangleContainer.style.verticalAlign = 'middle';
+    
+    const existingIcon = item.querySelector('img');
+        if (existingIcon) {
+            existingIcon.parentNode.replaceChild(triangleContainer, existingIcon);
         }
-    });
+    }
+});
 });
