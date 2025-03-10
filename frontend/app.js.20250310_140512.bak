@@ -314,17 +314,17 @@ function activarPowerUp(powerUp) {
             
         case 'score':
             clearTimeout(scoreTimeout);
-            scoreMultiplier = 2.5; // Mayor multiplicador para compensar la dificultad
+            scoreMultiplier = 2;
             activePowerUpDisplay.textContent = "Power Up activo: Score Multiplier";
             scoreTimeout = setTimeout(() => {
                 scoreMultiplier = 1;
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-            }, 8000); // Duración reducida
+            }, 10000);
             break;
             
         case 'shrink':
             if (snake.length > 3) {
-                snake = snake.slice(0, Math.max(3, Math.floor(snake.length * 0.6))); // Reducción menos drástica
+                snake = snake.slice(0, Math.max(3, Math.floor(snake.length / 2)));
                 activePowerUpDisplay.textContent = "Power Up activo: Shrink";
                 setTimeout(() => {
                     activePowerUpDisplay.textContent = "Power Up activo: Ninguno";

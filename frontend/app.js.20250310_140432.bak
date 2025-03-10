@@ -290,41 +290,41 @@ function activarPowerUp(powerUp) {
     switch (powerUp.tipo) {
         case 'speed':
             clearTimeout(speedTimeout);
-            gameIntervalTime = baseGameInterval - 60; // Mayor velocidad para más desafío
+            gameIntervalTime = baseGameInterval - 40;
             restartGameInterval();
             activePowerUpDisplay.textContent = "Power Up activo: Speed Boost";
             speedTimeout = setTimeout(() => {
                 gameIntervalTime = baseGameInterval;
                 restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-            }, 8000); // Duración reducida
+            }, 10000);
             break;
             
         case 'slow':
             clearTimeout(slowTimeout);
-            gameIntervalTime = baseGameInterval + 30; // Menos ralentización para mayor dificultad
+            gameIntervalTime = baseGameInterval + 40;
             restartGameInterval();
             activePowerUpDisplay.textContent = "Power Up activo: Slow Down";
             slowTimeout = setTimeout(() => {
                 gameIntervalTime = baseGameInterval;
                 restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-            }, 7000); // Duración reducida
+            }, 10000);
             break;
             
         case 'score':
             clearTimeout(scoreTimeout);
-            scoreMultiplier = 2.5; // Mayor multiplicador para compensar la dificultad
+            scoreMultiplier = 2;
             activePowerUpDisplay.textContent = "Power Up activo: Score Multiplier";
             scoreTimeout = setTimeout(() => {
                 scoreMultiplier = 1;
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-            }, 8000); // Duración reducida
+            }, 10000);
             break;
             
         case 'shrink':
             if (snake.length > 3) {
-                snake = snake.slice(0, Math.max(3, Math.floor(snake.length * 0.6))); // Reducción menos drástica
+                snake = snake.slice(0, Math.max(3, Math.floor(snake.length / 2)));
                 activePowerUpDisplay.textContent = "Power Up activo: Shrink";
                 setTimeout(() => {
                     activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
