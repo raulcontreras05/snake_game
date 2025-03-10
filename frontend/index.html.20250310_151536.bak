@@ -44,14 +44,6 @@
 
     <!-- Sección del Juego -->
     <div id="gameSection" class="game-section hidden">
-      <div class="difficulty-selector">
-        <h3>Selecciona la dificultad:</h3>
-        <div class="difficulty-options">
-          <button class="difficulty-btn" data-difficulty="easy">Fácil</button>
-          <button class="difficulty-btn active" data-difficulty="normal">Normal</button>
-          <button class="difficulty-btn" data-difficulty="hard">Difícil</button>
-        </div>
-      </div>
       <div id="gameControls" class="game-controls">
         <button id="startGameButton" class="btn">Iniciar Juego</button>
         <button class="btn" onclick="cerrarSesion()">Cerrar Sesión</button>

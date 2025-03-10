@@ -348,23 +348,16 @@ function getPowerUpColor(tipo) {
 }
 function activarPowerUp(powerUp) {
     const config = difficultySettings[currentDifficulty];
-    const wasPaused = isPaused; // Guardamos el estado de pausa actual
     
     switch (powerUp.tipo) {
         case 'speed':
             clearTimeout(speedTimeout);
             gameIntervalTime = config.baseInterval - config.speedBoostReduction;
-            // Solo reiniciamos el intervalo si el juego está en marcha
-            if (!wasPaused) {
-                restartGameInterval();
-            }
+            restartGameInterval();
             activePowerUpDisplay.textContent = "Power Up activo: Speed Boost";
             speedTimeout = setTimeout(() => {
                 gameIntervalTime = config.baseInterval;
-                // Solo reiniciamos el intervalo si el juego está en marcha
-                if (!isPaused) {
-                    restartGameInterval();
-                }
+                restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
             }, config.powerUpDuration);
             break;
@@ -372,17 +365,11 @@ function activarPowerUp(powerUp) {
         case 'slow':
             clearTimeout(slowTimeout);
             gameIntervalTime = config.baseInterval + config.slowBoostIncrease;
-            // Solo reiniciamos el intervalo si el juego está en marcha
-            if (!wasPaused) {
-                restartGameInterval();
-            }
+            restartGameInterval();
             activePowerUpDisplay.textContent = "Power Up activo: Slow Down";
             slowTimeout = setTimeout(() => {
                 gameIntervalTime = config.baseInterval;
-                // Solo reiniciamos el intervalo si el juego está en marcha
-                if (!isPaused) {
-                    restartGameInterval();
-                }
+                restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
             }, config.powerUpDuration);
             break;

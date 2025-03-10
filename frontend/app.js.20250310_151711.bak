@@ -172,14 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Funciones principales del juego ---
-    // --- Funciones principales del juego ---
     function iniciarJuego() {
-        // Aplicar configuración según la dificultad seleccionada
-        const config = difficultySettings[currentDifficulty];
-        gameIntervalTime = config.baseInterval;
-        obstacleSpawnRate = config.obstacleSpawnRate;
-        powerUpSpawnRate = config.powerUpSpawnRate;
-        
         snake = [{ x: canvasSize / 2, y: canvasSize / 2 }];
         direction = 'RIGHT';
         food = generarComida();
@@ -194,11 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
         startGameButton.style.display = 'block';
         restartGameInterval();
     }
+
     function restartGameInterval() {
-        // Siempre limpiamos el intervalo anterior y creamos uno nuevo con la velocidad actualizada
-        if (gameInterval) clearInterval(gameInterval);
-        // Crear un nuevo intervalo con la velocidad actualizada
-        gameInterval = setInterval(gameLoop, gameIntervalTime);
+        // Si ya hay un intervalo activo, lo limpiamos solo si no estamos reanudando de una pausa
+        if (gameInterval && !isPaused) clearInterval(gameInterval);
+        // Si no hay intervalo o estamos reanudando, creamos uno nuevo
+        if (!gameInterval) {
+            gameInterval = setInterval(gameLoop, gameIntervalTime);
+        }
     }
 
     function generarComida() {
@@ -347,55 +343,41 @@ function getPowerUpColor(tipo) {
     }
 }
 function activarPowerUp(powerUp) {
-    const config = difficultySettings[currentDifficulty];
-    const wasPaused = isPaused; // Guardamos el estado de pausa actual
-    
     switch (powerUp.tipo) {
         case 'speed':
             clearTimeout(speedTimeout);
-            gameIntervalTime = config.baseInterval - config.speedBoostReduction;
-            // Solo reiniciamos el intervalo si el juego está en marcha
-            if (!wasPaused) {
-                restartGameInterval();
-            }
+            gameIntervalTime = baseGameInterval - 60; // Mayor velocidad para más desafío
+            restartGameInterval();
             activePowerUpDisplay.textContent = "Power Up activo: Speed Boost";
             speedTimeout = setTimeout(() => {
-                gameIntervalTime = config.baseInterval;
-                // Solo reiniciamos el intervalo si el juego está en marcha
-                if (!isPaused) {
-                    restartGameInterval();
-                }
+                gameIntervalTime = baseGameInterval;
+                restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-            }, config.powerUpDuration);
+            }, 8000); // Duración reducida
             break;
             
         case 'slow':
             clearTimeout(slowTimeout);
-            gameIntervalTime = config.baseInterval + config.slowBoostIncrease;
-            // Solo reiniciamos el intervalo si el juego está en marcha
-            if (!wasPaused) {
-                restartGameInterval();
-            }
+            gameIntervalTime = baseGameInterval + 30; // Menos ralentización para mayor dificultad
+            restartGameInterval();
             activePowerUpDisplay.textContent = "Power Up activo: Slow Down";
             slowTimeout = setTimeout(() => {
-                gameIntervalTime = config.baseInterval;
-                // Solo reiniciamos el intervalo si el juego está en marcha
-                if (!isPaused) {
-                    restartGameInterval();
-                }
+                gameIntervalTime = baseGameInterval;
+                restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-            }, config.powerUpDuration);
+            }, 7000); // Duración reducida
             break;
             
         case 'score':
             clearTimeout(scoreTimeout);
-            scoreMultiplier = config.scoreMultiplierValue;
+            scoreMultiplier = 2.5; // Mayor multiplicador para compensar la dificultad
             activePowerUpDisplay.textContent = "Power Up activo: Score Multiplier";
             scoreTimeout = setTimeout(() => {
                 scoreMultiplier = 1;
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
-            }, config.powerUpDuration);
+            }, 8000); // Duración reducida
             break;
+            
         case 'shrink':
             if (snake.length > 3) {
                 snake = snake.slice(0, Math.max(3, Math.floor(snake.length * 0.6))); // Reducción menos drástica
@@ -466,29 +448,6 @@ function activarPowerUp(powerUp) {
                 case 'ArrowDown': if (direction !== 'UP') direction = 'DOWN'; break;
             }
         }
-    });
-    
-    // Event listeners para los botones de dificultad
-    document.querySelectorAll('.difficulty-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            // Quitar la clase 'active' de todos los botones
-            document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Añadir la clase 'active' al botón seleccionado
-            this.classList.add('active');
-            
-            // Actualizar la dificultad actual
-            currentDifficulty = this.getAttribute('data-difficulty');
-            
-            // Si hay un juego en curso, preguntar si quiere reiniciar con la nueva dificultad
-            if (gameInterval && !isPaused) {
-                if (confirm('¿Quieres reiniciar el juego con la nueva dificultad?')) {
-                    iniciarJuego();
-                }
-            }
-        });
     });
 
     startGameButton.addEventListener('click', () => {

@@ -195,10 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
         restartGameInterval();
     }
     function restartGameInterval() {
-        // Siempre limpiamos el intervalo anterior y creamos uno nuevo con la velocidad actualizada
-        if (gameInterval) clearInterval(gameInterval);
-        // Crear un nuevo intervalo con la velocidad actualizada
-        gameInterval = setInterval(gameLoop, gameIntervalTime);
+        // Si ya hay un intervalo activo, lo limpiamos solo si no estamos reanudando de una pausa
+        if (gameInterval && !isPaused) clearInterval(gameInterval);
+        // Si no hay intervalo o estamos reanudando, creamos uno nuevo
+        if (!gameInterval) {
+            gameInterval = setInterval(gameLoop, gameIntervalTime);
+        }
     }
 
     function generarComida() {
@@ -348,23 +350,16 @@ function getPowerUpColor(tipo) {
 }
 function activarPowerUp(powerUp) {
     const config = difficultySettings[currentDifficulty];
-    const wasPaused = isPaused; // Guardamos el estado de pausa actual
     
     switch (powerUp.tipo) {
         case 'speed':
             clearTimeout(speedTimeout);
             gameIntervalTime = config.baseInterval - config.speedBoostReduction;
-            // Solo reiniciamos el intervalo si el juego está en marcha
-            if (!wasPaused) {
-                restartGameInterval();
-            }
+            restartGameInterval();
             activePowerUpDisplay.textContent = "Power Up activo: Speed Boost";
             speedTimeout = setTimeout(() => {
                 gameIntervalTime = config.baseInterval;
-                // Solo reiniciamos el intervalo si el juego está en marcha
-                if (!isPaused) {
-                    restartGameInterval();
-                }
+                restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
             }, config.powerUpDuration);
             break;
@@ -372,17 +367,11 @@ function activarPowerUp(powerUp) {
         case 'slow':
             clearTimeout(slowTimeout);
             gameIntervalTime = config.baseInterval + config.slowBoostIncrease;
-            // Solo reiniciamos el intervalo si el juego está en marcha
-            if (!wasPaused) {
-                restartGameInterval();
-            }
+            restartGameInterval();
             activePowerUpDisplay.textContent = "Power Up activo: Slow Down";
             slowTimeout = setTimeout(() => {
                 gameIntervalTime = config.baseInterval;
-                // Solo reiniciamos el intervalo si el juego está en marcha
-                if (!isPaused) {
-                    restartGameInterval();
-                }
+                restartGameInterval();
                 activePowerUpDisplay.textContent = "Power Up activo: Ninguno";
             }, config.powerUpDuration);
             break;
