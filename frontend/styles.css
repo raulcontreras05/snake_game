@@ -1,14 +1,24 @@
+:root {
+  --primary-color: #74ebd5;
+  --secondary-color: #ACB6E5;
+  --text-color: #333;
+  --background-gradient: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--background-gradient);
   margin: 0;
   padding: 20px;
-  color: #333;
+  color: var(--text-color);
   text-align: center;
-  min-height: 100vh; /* Asegura altura mínima */
-  display: flex; /* Mejora el centrado */
-  flex-direction: column; /* Organiza elementos verticalmente */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.6;
 }
+/* flex-direction: column; Organiza elementos verticalmente */
 .container {
   max-width: 800px;
   margin: 0 auto;
@@ -50,21 +60,25 @@ input:focus {
   box-shadow: 0 0 5px rgba(116, 235, 213, 0.5);
 }
 button.btn {
-  padding: 12px 24px;
+  padding: 12px 28px;
   margin: 8px;
-  background-color: #333;
-  color: #fff;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  color: var(--text-color);
   border: none;
-  border-radius: 4px;
+  border-radius: 25px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   font-size: 16px;
+  font-weight: 500;
   letter-spacing: 0.5px;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
 }
 button.btn:hover {
-  background-color: #555;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 button.btn:active {
   transform: translateY(0);
